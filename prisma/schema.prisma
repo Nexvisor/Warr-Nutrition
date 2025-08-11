@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  firstName      String
+  lastName String
+  password  String
+  phone     String @unique
+  address   Address[] 
+  addressId String?  @db.ObjectId @unique
+  cart      Cart?
+  orders    Order[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  role      Role      @default(USER)
+}
+
+model Address {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  address1  String
+  address2  String?  // optional
+  pincode   String
+  city      String
+  state     String
+  userId    String   @db.ObjectId
+  orderId   String?  @db.ObjectId  // 👈 Make optional and keep @db.ObjectId
+  order     Order?   @relation(fields: [orderId], references: [id]) // 👈 Optional relation
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Product {
+ id  String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  keyBenefits      Benefit[]
+  productHighlights String[]
+  nutritionInformation Nutrition[]
+  energy           String?
+  discountPrice Int
+  category    String
+  imageUrls    String[]
+  price       Int
+  stock       Int      // Quantity available
+  weight   String?
+  flavor String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+}
+
+
+model Benefit {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  topic       String
+  description String
+  product     Product? @relation(fields: [productId], references: [id])
+  productId   String?  @db.ObjectId
+}
+
+model Nutrition {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  nutrition String
+  quantity  String?
+  product   Product? @relation(fields: [productId], references: [id])
+  productId String?  @db.ObjectId
+}
+
+model Cart {
+ id  String @id @default(auto()) @map("_id") @db.ObjectId
+  user      User         @relation(fields: [userId], references: [id])
+  userId    String      @db.ObjectId @unique
+  items     CartItem[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  cartId    String   @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String   @db.ObjectId
+  quantity  Int
+}
+
+model Order {
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  user      User         @relation(fields: [userId], references: [id])
+  userId    String       @db.ObjectId
+  items     OrderItem[]
+  total     Int
+  createdAt DateTime     @default(now())
+  razorpay_id String?
+  status    OrderStatus  @default(PENDING)
+  addresses Address[]
+  addressId String
+}
+
+model OrderItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String   @db.ObjectId
+
+  product   Product? @relation(fields: [productId], references: [id])
+  productId String?  @db.ObjectId
+
+  quantity  Int
+  price     Float
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
