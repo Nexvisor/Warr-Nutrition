@@ -27,6 +27,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { ImageCompo } from "@/app/component/ImageCompo";
 import AddressSection from "@/app/component/AddressSection";
+
 export default function CartPage() {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -57,6 +58,9 @@ export default function CartPage() {
     ) || 0;
 
   const shipping = subtotal > 100 ? 0 : 9.99;
+  const totalAmount = promoApplied
+    ? (subtotal * 0.9 + shipping).toFixed(2)
+    : (subtotal + shipping).toFixed(2);
 
   useEffect(() => {
     dispatch(setIsFetch(true));
@@ -111,9 +115,136 @@ export default function CartPage() {
     }
   };
 
+  useEffect(() => {
+    if (!selectedAddressId) {
+      return;
+    }
+    confirmPayment();
+  }, [selectedAddressId]);
+
   function checkout() {
     setIsAddressDrawerOpen(true);
   }
+  const confirmPayment = () => {
+    startTransition(async () => {
+      try {
+        // 1️⃣ Create order on backend
+        const orderRes = await axios.post("/api/orders", {
+          products: cartProducts,
+          totalPrice: Number(totalAmount),
+          userId: userInfo.id,
+          addressId: selectedAddressId,
+        });
+
+        const { success, message, orderInfo } = orderRes.data;
+
+        if (!success) {
+          toast.error(message || "Unable to create order.", {
+            position: "bottom-right",
+            duration: 3000,
+            className: "bg-red-700 text-white border border-red-600",
+            style: {
+              backgroundColor: "#C1292E",
+              color: "white",
+              border: "1px solid #3e5692",
+            },
+          });
+          return;
+        }
+
+        // Validate required fields for Razorpay
+        if (!orderInfo?.razorpayOrderId || !orderInfo?.amount) {
+          toast.error("Invalid order data received from server.", {
+            position: "bottom-right",
+          });
+          return;
+        }
+
+        // 2️⃣ Fetch Razorpay key
+        const envRes = await axios.get("/api/getEnv");
+        const { key_id } = envRes.data || {};
+        if (!key_id) {
+          toast.error("Payment configuration is missing.", {
+            position: "bottom-right",
+          });
+          return;
+        }
+
+        // 3️⃣ Razorpay checkout config
+        const options = {
+          key: key_id,
+          amount: orderInfo.amount, // from server
+          currency: orderInfo.currency || "INR",
+          name: `${userInfo.firstName} ${userInfo.lastName}`,
+          description: "Order Payment",
+          order_id: orderInfo.razorpayOrderId,
+          method: {
+            netbanking: true,
+            card: true,
+            upi: true,
+            paylater: false,
+          },
+          handler: async function (response: any) {
+            try {
+              // 4️⃣ Verify payment on backend
+              const verifyRes = await axios.post("/api/verify-payment", {
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+                cartId: cart.id,
+              });
+
+              const { success, message } = verifyRes.data;
+              if (success) {
+                toast.success("Order booked successfully!", {
+                  position: "bottom-right",
+                  duration: 3000,
+                  className: "bg-green-700 text-white border border-green-600",
+                  style: {
+                    backgroundColor: "#285943",
+                    color: "white",
+                    border: "1px solid #3e5692",
+                  },
+                });
+              } else {
+                toast.error(message || "Payment verification failed.", {
+                  position: "bottom-right",
+                });
+              }
+            } catch (err: any) {
+              console.error("Payment verification failed:", err.message);
+              toast.error("Payment verification failed.", {
+                position: "bottom-right",
+              });
+            }
+          },
+          prefill: {
+            name: `${userInfo.firstName} ${userInfo.lastName}`,
+            contact: userInfo.phone,
+          },
+          theme: {
+            color: "#092553",
+          },
+        };
+
+        // 5️⃣ Open Razorpay Checkout
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on("payment.failed", function (response: any) {
+          console.error("Payment failed:", response.error);
+          toast.error(
+            response?.error?.description || "Payment was not completed.",
+            { position: "bottom-right" }
+          );
+        });
+        rzp.open();
+      } catch (error: any) {
+        console.error("Razorpay initialization failed:", error.message);
+        toast.error("Something went wrong while processing your order.", {
+          position: "bottom-right",
+        });
+      }
+    });
+  };
 
   return (
     <div>
@@ -349,7 +480,7 @@ export default function CartPage() {
           >
             <ShoppingBag className="h-6 w-6" />
             <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-              {/* {cartProducts.reduce((total, item) => total + item.quantity, 0)} */}
+              {cartProducts.reduce((total, item) => total + item.quantity, 0)}
             </span>
           </Button>
         </div>

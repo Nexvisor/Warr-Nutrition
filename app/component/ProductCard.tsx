@@ -30,6 +30,7 @@ export function ProductCard({
   const isFetch = useSelector((state: any) => state.dataSlice.isFetch);
   const products = useSelector((state: any) => state.dataSlice.products);
   const cartProduct = useSelector((state: any) => state.dataSlice.cart);
+
   // selected Product
   const selectedProduct = products.find(
     (product: Product) => product.id === productId
@@ -51,10 +52,11 @@ export function ProductCard({
 
     startTransition(async () => {
       try {
+        // Update cart locally first
         let newCartProduct = {
-          id: new Date().toDateString(),
+          id: crypto.randomUUID(),
           items: [
-            ...cartProduct.items,
+            ...(cartProduct?.items || []),
             {
               price: selectedProduct.price,
               product: selectedProduct as Product,
@@ -81,17 +83,36 @@ export function ProductCard({
           icon: <ShoppingCart className="h-5 w-5" />,
         });
 
-        const req = await axios.post("/api/addCart", {
+        // API call
+        await axios.post("/api/addCart", {
           userId,
           productId,
           quantity,
         });
 
         dispatch(setIsFetch(!isFetch));
-      } catch (error) {
+      } catch (error: any) {
+        let message = "Something went wrong";
+
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            message =
+              error.response.data?.message ||
+              `Server error: ${error.response.status}`;
+          } else if (error.request) {
+            message =
+              "No response from server. Please check your internet connection.";
+          } else {
+            message = error.message;
+          }
+        } else {
+          message = error?.message || message;
+        }
+
         console.error("Error adding to cart:", error);
+
         toast.error("Failed to add to cart", {
-          description: "Something went wrong. Please try again.",
+          description: message,
           position: "bottom-right",
           duration: 3000,
           className: "bg-red-700 text-white border border-red-800",
@@ -138,7 +159,8 @@ export function ProductCard({
       <div className="p-2 md:p-4 pt-0">
         <Button
           className="w-full bg-gradient-to-br from-[#1e7ae4] to-[#052f5e] text-white px-6 py-2 rounded-md shadow-md hover:opacity-90 transition"
-          onClick={() => addToCart(userInfo.id, productId, 1)}
+          onClick={() => addToCart(userInfo?.id, productId, 1)}
+          disabled={isPending}
         >
           {isPending ? "Please Wait..." : "Add to Cart"}
         </Button>

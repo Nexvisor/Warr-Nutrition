@@ -1,7 +1,6 @@
 import { Next_Auth } from "@/utils/Next_Auth";
 import { prisma } from "@/utils/prisma";
 import { getServerSession } from "next-auth";
-
 import { NextRequest, NextResponse } from "next/server";
 import Razorpay from "razorpay";
 
@@ -13,21 +12,30 @@ const razorpay = new Razorpay({
 export const POST = async (req: NextRequest) => {
   const session = await getServerSession(Next_Auth);
   if (!session) {
-    return NextResponse.redirect(new URL("/Login", req.url)); // Proper redirect syntax
+    return NextResponse.json(
+      { success: false, message: "Unauthorized. Please log in." },
+      { status: 401 }
+    );
   }
 
   try {
     const { products, totalPrice, userId, addressId } = await req.json();
 
+    if (!products?.length || !totalPrice || !userId || !addressId) {
+      return NextResponse.json(
+        { success: false, message: "Missing required order fields." },
+        { status: 400 }
+      );
+    }
+
+    // Create Razorpay order
     const razorpayOrder = await razorpay.orders.create({
-      amount: totalPrice * 100, // In paisa
+      amount: totalPrice * 100, // in paisa
       currency: "INR",
-      receipt: `reciept-${Date.now()}`,
-      // notes: {
-      //   productIds: products.id.join(","),
-      // },
+      receipt: `receipt-${Date.now()}`,
     });
 
+    // Create order in DB
     const newOrder = await prisma.order.create({
       data: {
         userId,
@@ -37,6 +45,7 @@ export const POST = async (req: NextRequest) => {
       },
     });
 
+    // Create order items
     await Promise.all(
       products.map((product: any) =>
         prisma.orderItem.create({
@@ -60,6 +69,31 @@ export const POST = async (req: NextRequest) => {
       },
     });
   } catch (error: any) {
-    console.log(`Error in creating Order ${error.message}`);
+    console.error("Error creating order:", error);
+
+    let message = "Something went wrong while creating the order.";
+    let statusCode = 500;
+
+    // Razorpay error handling
+    if (error?.statusCode && error?.error?.description) {
+      message = error.error.description;
+      statusCode = error.statusCode;
+    }
+    // Prisma-specific error handling
+    else if (error.code && error.meta) {
+      message = `Database error: ${error.meta.cause || error.code}`;
+    }
+    // Axios/network-like errors
+    else if (error?.message) {
+      message = error.message;
+    }
+
+    return NextResponse.json(
+      {
+        success: false,
+        message,
+      },
+      { status: statusCode }
+    );
   }
 };

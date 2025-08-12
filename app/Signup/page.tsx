@@ -70,7 +70,7 @@ export default function SignupPage() {
         if (res.data.success) {
           router.push("/Login");
 
-          toast.success("Sign Up Successfull", {
+          toast.success("Sign Up Successful", {
             position: "bottom-right",
             duration: 3000,
             className: "bg-green-700 text-white border border-green-600",
@@ -80,9 +80,9 @@ export default function SignupPage() {
               border: "1px solid #3e5692",
             },
           });
-        } else if (!res.data.success) {
-          toast.success("Sign Up Failed", {
-            description: res.data.message,
+        } else {
+          toast.error("Sign Up Failed", {
+            description: res.data.message || "Something went wrong",
             position: "bottom-right",
             duration: 3000,
             className: "bg-red-700 text-white border border-red-600",
@@ -94,8 +94,28 @@ export default function SignupPage() {
           });
         }
       } catch (error: any) {
-        toast.success("Sign Up Failed", {
-          description: error.message,
+        let message = "Something went wrong";
+
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            // Server returned an error
+            message =
+              error.response.data?.message ||
+              `Server Error: ${error.response.status}`;
+          } else if (error.request) {
+            // No response from server
+            message =
+              "No response from server. Please check your internet connection.";
+          } else {
+            // Something else happened while setting up request
+            message = error.message;
+          }
+        } else {
+          message = error?.message || message;
+        }
+
+        toast.error("Sign Up Failed", {
+          description: message,
           position: "bottom-right",
           duration: 3000,
           className: "bg-red-700 text-white border border-red-600",
@@ -105,7 +125,8 @@ export default function SignupPage() {
             border: "1px solid #3e5692",
           },
         });
-        console.error("Signup error", error);
+
+        console.log("Signup error", error);
       }
     });
   };

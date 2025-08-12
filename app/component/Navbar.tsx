@@ -26,7 +26,7 @@ function Navbar() {
   const cart = useSelector((state: any) => state.dataSlice.cart) as Cart;
   const isFetch = useSelector((state: any) => state.dataSlice.isFetch);
   const pathname = usePathname();
-  console.log(pathname);
+
   useEffect(() => {
     if (userInfo?.id) {
       startTransition(async () => {
