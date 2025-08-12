@@ -27,6 +27,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { ImageCompo } from "@/app/component/ImageCompo";
 import AddressSection from "@/app/component/AddressSection";
+import { DiscountPercentage } from "@/constant/DiscountPercentage";
 
 export default function CartPage() {
   const dispatch = useDispatch();
@@ -53,9 +54,15 @@ export default function CartPage() {
   // Calculate cart totals
   const subtotal =
     cartProducts?.reduce(
-      (total, item: CartItem) => total + item.product.price * item.quantity,
+      (total, item: CartItem) =>
+        total + getDiscountPrice(item.product.discountPrice) * item.quantity,
       0
     ) || 0;
+
+  function getDiscountPrice(price: number) {
+    const actualPrice = Math.floor(price - (DiscountPercentage / 100) * price);
+    return actualPrice;
+  }
 
   const shipping = subtotal > 100 ? 0 : 9.99;
   const totalAmount = promoApplied
@@ -310,7 +317,7 @@ export default function CartPage() {
                             </h3>
                           </div>
                           <p className="font-medium text-[#0047AB]">
-                            ₹{item.product.price}
+                            ₹{getDiscountPrice(item.product.discountPrice)}
                           </p>
                         </div>
 
@@ -374,7 +381,7 @@ export default function CartPage() {
                         <h3 className="text-sm font-medium">{product.title}</h3>
                         <div className="mt-2 flex items-center justify-between">
                           <span className="text-sm font-bold text-[#0047AB]">
-                            ₹{product.price.toFixed(2)}
+                            ₹{getDiscountPrice(product.discountPrice)}
                           </span>
                           <Button
                             size="sm"

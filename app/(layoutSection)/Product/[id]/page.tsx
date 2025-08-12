@@ -27,6 +27,7 @@ import { toast } from "sonner";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Product } from "@/utils/DataSlice";
+import { DiscountPercentage } from "@/constant/DiscountPercentage";
 
 function ProductDetailPage() {
   const router = useRouter();
@@ -74,7 +75,8 @@ function ProductDetailPage() {
   const userInfo = useSelector((state: any) => state.dataSlice.userInfo);
 
   const actualPrice = Math.floor(
-    filterProduct.discountPrice - (20 / 100) * filterProduct.discountPrice
+    filterProduct.discountPrice -
+      (DiscountPercentage / 100) * filterProduct.discountPrice
   );
   function addToCart(userId: string, productId: string, quantity: number) {
     if (!userId) {
@@ -253,7 +255,7 @@ function ProductDetailPage() {
               ₹{filterProduct.discountPrice}
             </span>
             <span className="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded">
-              20% OFF
+              {DiscountPercentage}% OFF
             </span>
           </div>
 

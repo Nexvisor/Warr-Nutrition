@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { ShoppingCart } from "lucide-react";
 import { ImageCompo } from "./ImageCompo";
 import { useTransition } from "react";
+import { DiscountPercentage } from "@/constant/DiscountPercentage";
 interface ProductCardProps {
   title: string;
   price: number;
@@ -41,7 +42,8 @@ export function ProductCard({
   const [isPending, startTransition] = useTransition();
 
   const actualPrice = Math.floor(
-    selectedProduct.discountPrice - (20 / 100) * selectedProduct.discountPrice
+    selectedProduct.discountPrice -
+      (DiscountPercentage / 100) * selectedProduct.discountPrice
   );
   // product in cart state  then  make api call becasuse of maintianing state first then api
   function addToCart(userId: string, productId: string, quantity: number) {
@@ -150,7 +152,7 @@ export function ProductCard({
               ₹{selectedProduct.discountPrice}
             </span>
             <span className="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded">
-              20% OFF
+              {DiscountPercentage}% OFF
             </span>
           </div>
         </div>
