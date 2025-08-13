@@ -2,20 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 
 export const GET = async () => {
-  const allOrders = await prisma.order.findMany({
+  let allOrders = await prisma.order.findMany({
     include: {
-      addresses: {
-        select: {
-          address1: true,
-          address2: true,
-          pincode: true,
-          city: true,
-          state: true,
-          userId: true,
-          orderId: true,
-          createdAt: true,
-        },
-      },
       items: {
         include: {
           product: {
@@ -30,5 +18,20 @@ export const GET = async () => {
       },
     },
   });
+
+  const addressIds = allOrders.map((order) => order.addressId).filter(Boolean);
+  const addresses = await prisma.address.findMany({
+    where: {
+      id: {
+        in: addressIds,
+      },
+    },
+  });
+  allOrders = allOrders.map((order) => ({
+    ...order,
+    address:
+      addresses.find((address) => address.id === order.addressId) || null,
+  }));
+
   return NextResponse.json({ success: true, allOrders });
 };
