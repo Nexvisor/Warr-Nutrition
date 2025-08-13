@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WAR NUTRITION - Premium Supplements for Athletes",
+  title: "WARR NUTRITION - Premium Supplements for Athletes",
   description:
-    "Premium nutrition supplements for fitness enthusiasts and athletes. Dominate your workout with WAR NUTRITION.",
+    "Premium nutrition supplements for fitness enthusiasts and athletes. Dominate your workout with WARR NUTRITION.",
 };
 
 export default function RootLayout({
