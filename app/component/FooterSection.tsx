@@ -149,7 +149,7 @@ function FooterSection() {
         </div>
         <div className="border-t border-gray-800 mt-10 pt-6">
           <p className="text-gray-400 text-center text-sm">
-            © 2025 WAR NUTRITION. All rights reserved.
+            © 2025 WARR NUTRITION. All rights reserved.
           </p>
         </div>
       </div>

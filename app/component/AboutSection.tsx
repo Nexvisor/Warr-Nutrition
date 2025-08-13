@@ -16,7 +16,7 @@ export default function AboutSection() {
           <div className="text-gray-200 space-y-4">
             <p className="text-lg">
               In 2020, amidst a world grappling with unprecedented challenges,
-              War Nutrition was born in the heart of India with a simple yet
+              Warr Nutrition was born in the heart of India with a simple yet
               powerful mission: to empower individuals to take charge of their
               health and well-being. Recognizing that modern life often feels
               like a battle, we set out to create a line of supplements that
