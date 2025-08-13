@@ -64,6 +64,7 @@ export type OrderResponse = {
 export type Order = {
   id: string;
   status: string;
+  total: number;
   addressId: string;
   address: Address | null;
   items: OrderItem[];

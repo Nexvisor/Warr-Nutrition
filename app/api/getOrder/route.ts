@@ -23,6 +23,7 @@ export const GET = async (req: NextRequest) => {
       },
       select: {
         id: true,
+        total: true,
         items: {
           include: {
             product: {

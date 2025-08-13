@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useRouter } from "next/navigation";
-import { Package, ChevronRight, MapPin, Building } from "lucide-react";
+import { Package, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -16,7 +16,7 @@ export default function Orders() {
   const orders = useSelector((state: any) => state.dataSlice.orders);
   function getOrderTotal(order: Order) {
     const total = order.items.reduce((acc, item) => {
-      let price = item.price * item.quantity;
+      let price = order.total * item.quantity;
       acc = acc + price;
       return acc;
     }, 0);
@@ -76,7 +76,7 @@ export default function Orders() {
                         </p>
                       </div>
                       <p className="font-medium text-gray-900">
-                        ₹{item.price * item.quantity}
+                        ₹{order.total * item.quantity}
                       </p>
                     </div>
                   ))}
