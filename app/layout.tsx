@@ -20,6 +20,14 @@ export const metadata: Metadata = {
   title: "WARR NUTRITION - Premium Supplements for Athletes",
   description:
     "Premium nutrition supplements for fitness enthusiasts and athletes. Dominate your workout with WARR NUTRITION.",
+  openGraph: {
+    title: "WARR NUTRITION - Premium Supplements for Athletes",
+    description:
+      "Premium nutrition supplements for fitness enthusiasts and athletes. Dominate your workout with WARR NUTRITION.",
+    url: "https://warrnutrition.com",
+    siteName: "WARR NUTRITION",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
