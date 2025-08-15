@@ -19,9 +19,9 @@ export const POST = async (req: NextRequest) => {
   }
 
   try {
-    const { products, totalPrice, userId, addressId } = await req.json();
+    const { totalPrice } = await req.json();
 
-    if (!products?.length || !totalPrice || !userId || !addressId) {
+    if (!totalPrice) {
       return NextResponse.json(
         { success: false, message: "Missing required order fields." },
         { status: 400 }
@@ -35,34 +35,9 @@ export const POST = async (req: NextRequest) => {
       receipt: `receipt-${Date.now()}`,
     });
 
-    // Create order in DB
-    const newOrder = await prisma.order.create({
-      data: {
-        userId,
-        total: totalPrice,
-        razorpay_id: razorpayOrder.id,
-        addressId,
-      },
-    });
-
-    // Create order items
-    await Promise.all(
-      products.map((product: any) =>
-        prisma.orderItem.create({
-          data: {
-            orderId: newOrder.id,
-            productId: product.product.id,
-            quantity: product.quantity,
-            price: product.product.price,
-          },
-        })
-      )
-    );
-
     return NextResponse.json({
       success: true,
       orderInfo: {
-        orderId: newOrder.id,
         amount: razorpayOrder.amount,
         razorpayOrderId: razorpayOrder.id,
         currency: razorpayOrder.currency,

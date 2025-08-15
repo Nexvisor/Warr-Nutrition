@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 import { useDispatch, useSelector } from "react-redux";
-import { Product } from "@/utils/DataSlice";
+import { Product, setSelectedAddressId } from "@/utils/DataSlice";
 import { Cart, CartItem, setCart, setIsFetch } from "@/utils/DataSlice";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -45,6 +45,9 @@ export default function CartPage() {
   const [cartProducts, setCartProducts] = useState<CartItem[]>([]);
   const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [isPaymentSuccess, setIsPaymentSuccess] = useState<boolean | null>(
+    null
+  );
 
   useEffect(() => {
     // if cart is empty then set empty array
@@ -89,6 +92,12 @@ export default function CartPage() {
     }
   }, [products]);
 
+  useEffect(() => {
+    if (!isPaymentSuccess) {
+      dispatch(setSelectedAddressId(""));
+    }
+  }, [isPaymentSuccess]);
+
   // Update quantity
   const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -123,9 +132,7 @@ export default function CartPage() {
   };
 
   useEffect(() => {
-    if (!selectedAddressId) {
-      return;
-    }
+    if (!selectedAddressId || selectedAddressId === "") return;
     confirmPayment();
   }, [selectedAddressId]);
 
@@ -137,10 +144,7 @@ export default function CartPage() {
       try {
         // 1️⃣ Create order on backend
         const orderRes = await axios.post("/api/orders", {
-          products: cartProducts,
           totalPrice: Number(totalAmount),
-          userId: userInfo.id,
-          addressId: selectedAddressId,
         });
 
         const { success, message, orderInfo } = orderRes.data;
@@ -180,7 +184,7 @@ export default function CartPage() {
         // 3️⃣ Razorpay checkout config
         const options = {
           key: key_id,
-          amount: orderInfo.amount, // from server
+          amount: orderInfo.amount,
           currency: orderInfo.currency || "INR",
           name: `${userInfo.firstName} ${userInfo.lastName}`,
           description: "Order Payment",
@@ -192,6 +196,7 @@ export default function CartPage() {
             paylater: false,
           },
           handler: async function (response: any) {
+            setIsPaymentSuccess(true); // ✅ Payment success
             try {
               // 4️⃣ Verify payment on backend
               const verifyRes = await axios.post("/api/verify-payment", {
@@ -199,6 +204,10 @@ export default function CartPage() {
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpaySignature: response.razorpay_signature,
                 cartId: cart.id,
+                products: cartProducts,
+                userId: userInfo.id,
+                addressId: selectedAddressId,
+                totalPrice: Number(totalAmount),
               });
 
               const { success, message } = verifyRes.data;
@@ -225,6 +234,14 @@ export default function CartPage() {
               });
             }
           },
+          modal: {
+            ondismiss: function () {
+              setIsPaymentSuccess(false); // ❌ User closed without paying
+              toast.error("Payment window closed. Order not completed.", {
+                position: "bottom-right",
+              });
+            },
+          },
           prefill: {
             name: `${userInfo.firstName} ${userInfo.lastName}`,
             contact: userInfo.phone,
@@ -236,13 +253,16 @@ export default function CartPage() {
 
         // 5️⃣ Open Razorpay Checkout
         const rzp = new (window as any).Razorpay(options);
+
         rzp.on("payment.failed", function (response: any) {
+          setIsPaymentSuccess(false); // ❌ Payment failed
           console.error("Payment failed:", response.error);
           toast.error(
             response?.error?.description || "Payment was not completed.",
             { position: "bottom-right" }
           );
         });
+
         rzp.open();
       } catch (error: any) {
         console.error("Razorpay initialization failed:", error.message);

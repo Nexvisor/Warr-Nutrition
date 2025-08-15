@@ -3,14 +3,26 @@ import crypto from "crypto";
 import { prisma } from "@/utils/prisma";
 export const POST = async (req: NextRequest) => {
   try {
-    const { razorpayOrderId, razorpayPaymentId, razorpaySignature, cartId } =
-      await req.json();
+    const {
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature,
+      cartId,
+      products,
+      totalPrice,
+      userId,
+      addressId,
+    } = await req.json();
 
     if (
       !razorpayOrderId ||
       !razorpayPaymentId ||
       !razorpaySignature ||
-      !cartId
+      !cartId ||
+      !products?.length ||
+      !totalPrice ||
+      !userId ||
+      !addressId
     ) {
       return NextResponse.json({ success: false, message: "Invalid inputs" });
     }
@@ -29,35 +41,31 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    const order = await prisma.order.findFirst({
-      where: {
+    // Create order in DB
+    const newOrder = await prisma.order.create({
+      data: {
+        userId,
+        total: totalPrice,
         razorpay_id: razorpayOrderId,
+        addressId,
+        status: "PAID",
       },
     });
-    if (order) {
-      await prisma.order.update({
-        where: {
-          id: order.id,
-        },
-        data: {
-          status: "PAID",
-        },
-      });
-      await prisma.cartItem.deleteMany({
-        where: {
-          cartId: cartId,
-        },
-      });
-      return NextResponse.json({
-        success: true,
-        message: "Order confirm",
-      });
-    } else {
-      return NextResponse.json({
-        success: false,
-        message: "order not found",
-      });
-    }
+
+    // Create order items
+    await prisma.orderItem.createMany({
+      data: products.map((product: any) => ({
+        orderId: newOrder.id,
+        productId: product.product.id,
+        quantity: product.quantity,
+        price: product.product.price,
+      })),
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Order confirm",
+    });
   } catch (error: any) {
     console.log(error.message);
   }
