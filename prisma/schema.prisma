@@ -45,10 +45,6 @@ model Address {
   updatedAt DateTime @updatedAt
 }
 
-enum Role {
-  USER
-  ADMIN
-}
 
 model Product {
  id  String @id @default(auto()) @map("_id") @db.ObjectId
@@ -137,4 +133,9 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+enum Role {
+  USER
+  ADMIN
 }

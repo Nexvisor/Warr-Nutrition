@@ -212,6 +212,10 @@ export default function CartPage() {
 
               const { success, message } = verifyRes.data;
               if (success) {
+                // clearing cart
+                dispatch(setCart({} as Cart));
+                // clearing addressID from store
+                dispatch(setSelectedAddressId(""));
                 toast.success("Order booked successfully!", {
                   position: "bottom-right",
                   duration: 3000,

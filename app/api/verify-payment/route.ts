@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/utils/prisma";
+import { notifySlack } from "@/helpers/notifySlack";
 export const POST = async (req: NextRequest) => {
   try {
     const {
@@ -51,6 +52,11 @@ export const POST = async (req: NextRequest) => {
         status: "PAID",
       },
     });
+    const address = await prisma.address.findFirst({
+      where: {
+        id: addressId,
+      },
+    });
 
     // Create order items
     await prisma.orderItem.createMany({
@@ -60,6 +66,37 @@ export const POST = async (req: NextRequest) => {
         quantity: product.quantity,
         price: product.product.price,
       })),
+    });
+
+    // deleting cart items
+    await prisma.cartItem.deleteMany({
+      where: {
+        cartId: cartId,
+      },
+    });
+
+    // deleting cart products
+    await prisma.cart.delete({
+      where: {
+        id: cartId,
+      },
+    });
+
+    products.map(async (product: any) => {
+      const message = `---- ORDER CONFIRM ----
+        orderId: ${newOrder.id}
+        productId: ${product?.product.id}
+        quantity: ${product.quantity}
+        price: ${product.product.price}
+        address_1: ${address?.address1}
+        address_2: ${address?.address2}
+        pincode: ${address?.pincode}
+        city: ${address?.city}
+        state: ${address?.state}
+    `;
+
+      // Sending message to the slack of the WARR nutrition
+      await notifySlack(message);
     });
 
     return NextResponse.json({
