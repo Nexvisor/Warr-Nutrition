@@ -16,12 +16,14 @@ export default function Orders() {
   const orders = useSelector((state: any) => state.dataSlice.orders);
   function getOrderTotal(order: Order) {
     const total = order.items.reduce((acc, item) => {
-      let price = Number(order.total) * Number(item.quantity);
+      let price = Number(item.price) * Number(item.quantity);
       acc = acc + price;
       return acc;
     }, 0);
     return total;
   }
+
+  console.log(orders);
 
   return (
     <div>
@@ -76,7 +78,7 @@ export default function Orders() {
                         </p>
                       </div>
                       <p className="font-medium text-gray-900">
-                        ₹{Number(order.total) * Number(item.quantity)}
+                        ₹{Number(item.price) * Number(item.quantity)}
                       </p>
                     </div>
                   ))}

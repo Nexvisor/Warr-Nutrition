@@ -51,7 +51,18 @@ export default function CartPage() {
 
   useEffect(() => {
     // if cart is empty then set empty array
-    setCartProducts(cart.items ?? []);
+    let cartItems =
+      cart?.items?.length > 0
+        ? cart.items.map((item: CartItem) => ({
+            ...item,
+            product: {
+              ...item.product,
+              price: getDiscountPrice(item.product.discountPrice),
+            },
+          }))
+        : [];
+    console.log(cartItems);
+    setCartProducts(cartItems);
   }, [cart?.items]);
 
   // Calculate cart totals
@@ -341,7 +352,7 @@ export default function CartPage() {
                             </h3>
                           </div>
                           <p className="font-medium text-[#0047AB]">
-                            ₹{getDiscountPrice(item.product.discountPrice)}
+                            ₹{item.product.price}
                           </p>
                         </div>
 

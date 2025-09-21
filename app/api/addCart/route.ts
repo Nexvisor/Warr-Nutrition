@@ -11,7 +11,7 @@ export const POST = async (req: NextRequest) => {
     return NextResponse.json({ success: false, redirectTo: "/login" });
   }
   try {
-    const { userId, productId, quantity } = await req.json();
+    const { userId, productId, quantity, price } = await req.json();
 
     if (!userId || !productId) {
       return NextResponse.json(

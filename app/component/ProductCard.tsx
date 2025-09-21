@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
@@ -60,6 +59,7 @@ export function ProductCard({
           items: [
             ...(cartProduct?.items || []),
             {
+              id: crypto.randomUUID(),
               price: selectedProduct.price,
               product: selectedProduct as Product,
               quantity,

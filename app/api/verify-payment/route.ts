@@ -35,8 +35,6 @@ export const POST = async (req: NextRequest) => {
       .update(razorpayOrderId + "|" + razorpayPaymentId)
       .digest("hex");
 
-    console.log({ expectedSignature, razorpaySignature });
-
     if (razorpaySignature !== expectedSignature) {
       return NextResponse.json(
         { success: false, message: "Invalid Signature" },
@@ -98,6 +96,7 @@ export const POST = async (req: NextRequest) => {
     });
 
     products.map(async (product: any) => {
+      console.log(product);
       const message = `---- ORDER CONFIRM ----
         userId: ${userId}
         username: ${userInfo?.firstName} ${userInfo?.lastName}
@@ -105,13 +104,14 @@ export const POST = async (req: NextRequest) => {
         phone: ${userInfo?.phone}
         orderId: ${newOrder.id}
         productId: ${product?.product.id}
+        title: ${product.product.title}
         quantity: ${product.quantity}
-        price: ${product.product.price}
         address_1: ${address?.address1}
         address_2: ${address?.address2}
         pincode: ${address?.pincode}
         city: ${address?.city}
         state: ${address?.state}
+        paidPrice: ${product?.product.price}
         orderAt: ${getDateTime(newOrder.createdAt)}
     `;
 
