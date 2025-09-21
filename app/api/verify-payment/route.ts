@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/utils/prisma";
 import { notifySlack } from "@/helpers/notifySlack";
+import { getHours, getMinutes } from "date-fns";
+
 export const POST = async (req: NextRequest) => {
   try {
     const {
@@ -82,8 +84,25 @@ export const POST = async (req: NextRequest) => {
       },
     });
 
+    const userInfo = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+      },
+    });
+
     products.map(async (product: any) => {
       const message = `---- ORDER CONFIRM ----
+        userId: ${userId}
+        username: ${userInfo?.firstName} ${userInfo?.lastName}
+        email: ${userInfo?.email}
+        phone: ${userInfo?.phone}
         orderId: ${newOrder.id}
         productId: ${product?.product.id}
         quantity: ${product.quantity}
@@ -93,6 +112,7 @@ export const POST = async (req: NextRequest) => {
         pincode: ${address?.pincode}
         city: ${address?.city}
         state: ${address?.state}
+        orderAt: ${getDateTime(newOrder.createdAt)}
     `;
 
       // Sending message to the slack of the WARR nutrition
@@ -107,3 +127,15 @@ export const POST = async (req: NextRequest) => {
     console.log(error.message);
   }
 };
+
+function getDateTime(dateString: Date) {
+  const dateInfo = new Date(dateString);
+  let date = dateInfo.getDate();
+  let month = dateInfo.getMonth() + 1;
+  let year = dateInfo.getFullYear();
+
+  let hours = getHours(dateInfo);
+  let minutes = getMinutes(dateInfo);
+
+  return `${date}-${month}-${year} ${hours}:${minutes}`;
+}
