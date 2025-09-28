@@ -102,7 +102,7 @@ function FooterSection() {
                   href="/Creatine"
                   className="text-gray-400 hover:text-white"
                 >
-                  Ceratine
+                  Creatine
                 </Link>
               </li>
             </ul>
@@ -125,7 +125,7 @@ function FooterSection() {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
-                <span>Cdroverseas@gmail.com</span>
+                <span>Info@warrnutrition.com</span>
               </li>
               <li className="flex items-start">
                 <svg

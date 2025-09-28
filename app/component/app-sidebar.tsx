@@ -1,6 +1,13 @@
 "use client";
 
-import { Plus, List, LogOut, Utensils } from "lucide-react";
+import {
+  Plus,
+  List,
+  LogOut,
+  Utensils,
+  ListOrdered,
+  Users2,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -28,6 +35,16 @@ const navigationItems = [
     title: "Product List",
     url: "/dashboard/productList",
     icon: List,
+  },
+  {
+    title: "Users",
+    url: "/dashboard/users",
+    icon: Users2,
+  },
+  {
+    title: "Orders",
+    url: "/dashboard/orders",
+    icon: ListOrdered,
   },
 ];
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
+import { Phone } from "lucide-react";
 
 export const GET = async () => {
   let allOrders = await prisma.order.findMany({
@@ -14,6 +15,15 @@ export const GET = async () => {
               weight: true,
             },
           },
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
         },
       },
     },

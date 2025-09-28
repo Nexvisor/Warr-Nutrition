@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import orders from "razorpay/dist/types/orders";
 
 export interface NutritionInformation {
   id: string;
@@ -35,6 +34,8 @@ export interface UserInfo {
   firstName: string;
   lastName: string;
   phone: string;
+  role?: string;
+  createdAt: Date;
 }
 export interface Cart {
   id: string;

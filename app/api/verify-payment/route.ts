@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/utils/prisma";
-import { notifySlack } from "@/helpers/notifySlack";
+import sendMessage from "@/helpers/sendMessage";
 import { getHours, getMinutes } from "date-fns";
 
 export const POST = async (req: NextRequest) => {
@@ -96,7 +96,6 @@ export const POST = async (req: NextRequest) => {
     });
 
     products.map(async (product: any) => {
-      console.log(product);
       const message = `---- ORDER CONFIRM ----
         userId: ${userId}
         username: ${userInfo?.firstName} ${userInfo?.lastName}
@@ -115,8 +114,11 @@ export const POST = async (req: NextRequest) => {
         orderAt: ${getDateTime(newOrder.createdAt)}
     `;
 
-      // Sending message to the slack of the WARR nutrition
-      await notifySlack(message);
+      // Sending message to the Mail to the of the WARR nutrition
+      await sendMessage(
+        message,
+        `${userInfo?.firstName} ${userInfo?.lastName}`
+      );
     });
 
     return NextResponse.json({

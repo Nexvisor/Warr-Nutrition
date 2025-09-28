@@ -3,7 +3,7 @@
 import type React from "react";
 
 import Link from "next/link";
-import { Dumbbell, ArrowRight, ChevronLeft } from "lucide-react";
+import { ArrowRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -19,10 +19,13 @@ import { z } from "zod";
 import { useTransition } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { useSelector } from "react-redux";
+import { RootState } from "@/utils/Store";
 
 export default function LoginPage() {
   const navigation = useRouter();
   const [isPending, startTransition] = useTransition();
+  const userData = useSelector((state: RootState) => state.dataSlice.userInfo);
   const formSchema = z.object({
     email: z.string().email(),
     password: z.string(),
@@ -59,7 +62,6 @@ export default function LoginPage() {
           });
           throw new Error(res.error);
         }
-        console.log(res);
 
         if (res?.ok) {
           toast.success("Login Successfull", {
@@ -72,6 +74,7 @@ export default function LoginPage() {
               border: "1px solid #3e5692",
             },
           });
+
           navigation.push("/"); // or your desired redirect path
         }
       } catch (error: any) {

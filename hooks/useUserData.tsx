@@ -7,12 +7,14 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setUserInfo } from "@/utils/DataSlice";
 import { UserInfo } from "@/utils/DataSlice";
+import { useRouter } from "next/navigation";
 export const useUserData = () => {
   const { data: session } = useSession();
   const [userInfo, setuserInfo] = useState<UserInfo>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
+  const navigate = useRouter();
 
   useEffect(() => {
     const fetchuserInfo = async () => {
@@ -33,6 +35,9 @@ export const useUserData = () => {
             id: session.user.id,
           } as UserInfo;
           setuserInfo(data);
+          if (session.user.role === "ADMIN") {
+            navigate.push("/dashboard");
+          }
         } else {
           setError(message || "Failed to fetch user data");
         }
