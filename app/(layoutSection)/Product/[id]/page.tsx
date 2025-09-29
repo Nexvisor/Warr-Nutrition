@@ -128,6 +128,13 @@ function ProductDetailPage() {
   const handleImageError = (index: number) => {
     setImageErrors((prev) => ({ ...prev, [index]: true }));
   };
+
+  const isOutofStuck =
+    filterProduct.category === "Fish Oil" ||
+    filterProduct.category === "Protein" ||
+    filterProduct.category === "Whey Protein" ||
+    filterProduct.category === "Multi Vitamin";
+
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <Link
@@ -302,13 +309,24 @@ function ProductDetailPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <Button
-              className="w-full bg-gradient-to-br from-[#1e7ae4] to-[#052f5e] text-white px-6 py-2 rounded-md shadow-md hover:opacity-90 transition"
-              onClick={() => addToCart(userInfo.id, filterProduct.id, quantity)}
-            >
-              <ShoppingCart className="mr-2 h-4 w-4" />{" "}
-              {isPending ? "Please Wait...." : "Add to cart"}
-            </Button>
+            {isOutofStuck ? (
+              <Button
+                className="w-full bg-gradient-to-br from-[#1e7ae4] to-[#052f5e] text-white px-6 py-2 rounded-md shadow-md hover:opacity-90 transition"
+                disabled
+              >
+                Out of Stock
+              </Button>
+            ) : (
+              <Button
+                className="w-full bg-gradient-to-br from-[#1e7ae4] to-[#052f5e] text-white px-6 py-2 rounded-md shadow-md hover:opacity-90 transition"
+                onClick={() =>
+                  addToCart(userInfo.id, filterProduct.id, quantity)
+                }
+              >
+                <ShoppingCart className="mr-2 h-4 w-4" />{" "}
+                {isPending ? "Please Wait...." : "Add to cart"}
+              </Button>
+            )}
           </div>
         </div>
       </div>

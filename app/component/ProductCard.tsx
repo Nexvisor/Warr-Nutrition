@@ -127,17 +127,16 @@ export function ProductCard({
       }
     });
   }
+  const isOutofStuck =
+    selectedProduct.category === "Fish Oil" ||
+    selectedProduct.category === "Protein" ||
+    selectedProduct.category === "Whey Protein" ||
+    selectedProduct.category === "Multi Vitamin";
 
   return (
     <div className="group relative bg-white border rounded-lg overflow-hidden transition-all hover:shadow-md h-full hover:scale-105">
       <Link href={href} className="block p-2 md:p-4">
         <div className="aspect-square relative mb-2 md:mb-4">
-          {/* <Image
-            src={image || "/placeholder.svg"}
-            alt={title}
-            fill
-            className="object-contain"
-          /> */}
           <ImageCompo src={image} alt={title} />
         </div>
 
@@ -159,13 +158,22 @@ export function ProductCard({
       </Link>
 
       <div className="p-2 md:p-4 pt-0">
-        <Button
-          className="w-full bg-gradient-to-br from-[#1e7ae4] to-[#052f5e] text-white px-6 py-2 rounded-md shadow-md hover:opacity-90 transition"
-          onClick={() => addToCart(userInfo?.id, productId, 1)}
-          disabled={isPending}
-        >
-          {isPending ? "Please Wait..." : "Add to Cart"}
-        </Button>
+        {isOutofStuck ? (
+          <Button
+            className="w-full bg-gradient-to-br from-[#1e7ae4] to-[#052f5e] text-white px-6 py-2 rounded-md shadow-md hover:opacity-90 transition"
+            disabled
+          >
+            Out of Stock
+          </Button>
+        ) : (
+          <Button
+            className="w-full bg-gradient-to-br from-[#1e7ae4] to-[#052f5e] text-white px-6 py-2 rounded-md shadow-md hover:opacity-90 transition"
+            onClick={() => addToCart(userInfo?.id, productId, 1)}
+            disabled={isPending}
+          >
+            {isPending ? "Please Wait..." : "Add to Cart"}
+          </Button>
+        )}
       </div>
     </div>
   );

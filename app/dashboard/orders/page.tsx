@@ -1,18 +1,18 @@
 "use client";
 import Loader from "@/app/component/Loader";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import axios from "axios";
 import { useEffect, useState, useTransition } from "react";
 import { format } from "date-fns";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface OrderDetail {
   orderId: string;
@@ -52,6 +52,7 @@ const tableHeader = [
   "Order At",
 ];
 
+const ORDER_STATUS = ["PAID", "SHIPPED", "DELIVERED", "CANCELLED"];
 export default function Orders() {
   const [allOrders, setAllOrders] = useState<OrderDetail[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -104,60 +105,127 @@ export default function Orders() {
     });
   }, []);
 
+  async function onStatusChange(updatedStatus: string, orderId: string) {
+    await axios.post("/api/update-order-status", {
+      orderId,
+      orderStatus: updatedStatus,
+    });
+
+    const updatedOrders = allOrders.map((order: OrderDetail) => {
+      if (order.orderId === orderId) {
+        return { ...order, status: updatedStatus };
+      }
+      return order;
+    });
+    setAllOrders(updatedOrders);
+  }
+
   if (isPending) {
     return <Loader />;
   }
 
   return (
-    <div className="flex py-6 px-8 justify-center items-center">
-      <div className="flex flex-col gap-4 w-full">
-        <h2 className="text-xl font-bold">All Orders</h2>
-        <ScrollArea className="h-[450px] w-[99%] rounded-md border whitespace-nowrap">
-          {error ? (
-            <div className="text-red-500 font-medium">{error}</div>
-          ) : (
-            <Table>
-              {allOrders.length === 0 && !isPending && !error && (
-                <TableCaption>No orders found.</TableCaption>
-              )}
+    <div className="flex py-6 px-8 justify-center items-center bg-gray-50 min-h-screen">
+      <div className="flex flex-col gap-4 w-full max-w-7xl bg-white shadow-md rounded-lg p-6">
+        <h2 className="text-xl font-bold text-gray-800">All Orders</h2>
 
-              <TableHeader>
-                <TableRow>
-                  {tableHeader.map((header: string, index) => (
-                    <TableHead key={index}>{header}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody className="w-full px-4 py-5">
-                {allOrders?.map((info: OrderDetail, index: number) => (
-                  <TableRow key={index}>
-                    <TableCell>{info.orderId}</TableCell>
-                    <TableCell>{info.userId}</TableCell>
-                    <TableCell>{info.username}</TableCell>
-                    <TableCell>{info.email}</TableCell>
-                    <TableCell>{info.phone}</TableCell>
-                    <TableCell>{info.title}</TableCell>
-                    <TableCell>{info.weight}</TableCell>
-                    <TableCell>₹ {info.price}</TableCell>
-                    <TableCell>{info.quantity}</TableCell>
-                    <TableCell>{info.status}</TableCell>
-                    <TableCell>{info.address1}</TableCell>
-                    <TableCell>{info.address2 || "-"}</TableCell>
-                    <TableCell>{info.pincode}</TableCell>
-                    <TableCell>{info.city}</TableCell>
-                    <TableCell>{info.state}</TableCell>
-                    <TableCell>
+        <div className="border rounded-md overflow-hidden">
+          {/* Scrollable container with both directions */}
+          <div className="max-h-[500px] overflow-y-auto overflow-x-auto">
+            {/* Sticky header row with custom widths */}
+            <div className="grid min-w-[1600px] grid-cols-[160px_160px_140px_220px_150px_220px_120px_120px_100px_140px_240px_200px_120px_140px_140px_160px] bg-gray-100 sticky top-0 z-10 text-sm font-semibold text-gray-700">
+              {tableHeader.map((header: string, index: number) => (
+                <div
+                  key={index}
+                  className="px-4 py-3 border-b border-gray-200 text-center whitespace-nowrap"
+                >
+                  {header}
+                </div>
+              ))}
+            </div>
+
+            {/* Table body */}
+            <div className="flex flex-col divide-y divide-gray-200 text-sm text-gray-700">
+              {allOrders.length === 0 ? (
+                <div className="px-4 py-6 text-center text-gray-500">
+                  No orders found.
+                </div>
+              ) : (
+                allOrders.map((info: OrderDetail, index: number) => (
+                  <div
+                    key={index}
+                    className="grid min-w-[1600px] grid-cols-[160px_160px_140px_220px_150px_220px_120px_120px_100px_140px_240px_200px_120px_140px_140px_160px] hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <div className="px-4 py-3 text-center">
+                      {String(info.orderId).slice(9)}
+                    </div>
+                    <div className="px-4 py-3 text-center">
+                      {String(info.userId).slice(9)}
+                    </div>
+                    <div className="px-4 py-3 text-center">{info.username}</div>
+                    <div className="px-4 py-3 text-center">{info.email}</div>
+                    <div className="px-4 py-3 text-center">{info.phone}</div>
+                    <div className="px-4 py-3 text-center">{info.title}</div>
+                    <div className="px-4 py-3 text-center">{info.weight}</div>
+                    <div className="px-4 py-3 text-center">₹ {info.price}</div>
+                    <div className="px-4 py-3 text-center">{info.quantity}</div>
+                    <div className="px-4 py-3 text-center">
+                      {info.status === "DELIVERED" ? (
+                        <h2 className="bg-[#86EFAC] py-1 rounded-md">
+                          DELIVERED
+                        </h2>
+                      ) : (
+                        <Select
+                          defaultValue={info.status}
+                          onValueChange={(val: string) =>
+                            onStatusChange(val, info.orderId)
+                          }
+                        >
+                          <SelectTrigger
+                            className={`rounded-md ${
+                              info.status === "PAID"
+                                ? "bg-[#34D399]"
+                                : info.status === "SHIPPED"
+                                ? "bg-[#818CF8]"
+                                : info.status === "DELIVERED"
+                                ? "bg-[#86EFAC]"
+                                : info.status === "CANCELLED"
+                                ? "bg-[#FB7185]"
+                                : "bg-white"
+                            }`}
+                          >
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {ORDER_STATUS.map((status: string, index) => (
+                                <SelectItem value={status} key={index}>
+                                  {status}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                    <div className="px-4 py-3 text-center">{info.address1}</div>
+                    <div className="px-4 py-3 text-center">
+                      {info.address2 || "-"}
+                    </div>
+                    <div className="px-4 py-3 text-center">{info.pincode}</div>
+                    <div className="px-4 py-3 text-center">{info.city}</div>
+                    <div className="px-4 py-3 text-center">{info.state}</div>
+                    <div className="px-4 py-3 text-center">
                       {info.orderAt
                         ? format(new Date(info.orderAt), "dd/MM/yyyy")
                         : "N/A"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

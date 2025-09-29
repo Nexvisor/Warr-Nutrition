@@ -1,19 +1,10 @@
 "use client";
 import Loader from "@/app/component/Loader";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import { UserInfo } from "@/utils/DataSlice";
 import axios from "axios";
 import { useEffect, useState, useTransition } from "react";
 import { format } from "date-fns";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 const tableHeader = [
   "User ID",
@@ -39,37 +30,41 @@ export default function Users() {
     return <Loader />;
   }
   return (
-    <div className="flex py-6 px-8 justify-center items-center">
-      <div className="flex flex-col gap-4 w-full">
-        <h2 className="text-xl font-bold">All User</h2>
-        <ScrollArea className="h-[650px] rounded-md border p-4">
-          <Table>
-            {allUsers.length === 0 && (
-              <TableCaption>No user signup yet.</TableCaption>
-            )}
+    <div className="flex py-10 px-12 justify-center items-center bg-gray-50 min-h-screen">
+      <div className="flex flex-col gap-6 w-full max-w-6xl bg-white shadow-md rounded-xl p-6">
+        <h2 className="text-2xl font-bold text-gray-800">All Users</h2>
 
-            <TableHeader>
-              <TableRow>
-                {tableHeader.map((header: string, index) => (
-                  <TableHead key={index}>{header}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody className="w-full">
-              {allUsers.map((info: UserInfo, index: number) => (
-                <TableRow key={index}>
-                  <TableCell>{info.id}</TableCell>
-                  <TableCell>{`${info.firstName} ${info.lastName}`}</TableCell>
-                  <TableCell>{info.email}</TableCell>
-                  <TableCell>{info.phone}</TableCell>
-                  <TableCell>
-                    {format(new Date(info.createdAt), "dd/MM/yyyy")}
-                  </TableCell>
-                </TableRow>
+        <div className="flex flex-col border border-gray-200 rounded-lg overflow-hidden">
+          {/* Scrollable Container */}
+          <div className="max-h-[500px] overflow-y-auto">
+            {/* Sticky Header */}
+            <div className="grid grid-cols-5 bg-gray-100 py-3 px-4 text-center text-sm font-semibold text-gray-700 sticky top-0 z-10 shadow-sm">
+              {tableHeader.map((header, index) => (
+                <div key={index} className="flex justify-center items-center">
+                  {header}
+                </div>
               ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
+            </div>
+
+            {/* Table Rows */}
+            <div className="flex flex-col divide-y divide-gray-200">
+              {allUsers?.map((info, index) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-5 gap-4 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                >
+                  <p className="text-center">{info.id}</p>
+                  <p className="text-center font-medium">{`${info.firstName} ${info.lastName}`}</p>
+                  <p className="text-center">{info.email}</p>
+                  <p className="text-center">{info.phone}</p>
+                  <p className="text-center">
+                    {format(new Date(info.createdAt), "dd/MM/yyyy")}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

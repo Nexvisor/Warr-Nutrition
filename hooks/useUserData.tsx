@@ -35,6 +35,7 @@ export const useUserData = () => {
             id: session.user.id,
           } as UserInfo;
           setuserInfo(data);
+          console.log(session.user.role);
           if (session.user.role === "ADMIN") {
             navigate.push("/dashboard");
           }
