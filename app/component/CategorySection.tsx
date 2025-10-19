@@ -22,7 +22,7 @@ export function CategorySection() {
     try {
       const res = await axios.get("/api/getProduct");
       startTransition(() => {
-        const products = res.data.allProducts || [];
+        let products = res.data.allProducts || [];
 
         // Categorise the product based on their category
         const groupedByCategory: Record<string, Product[]> = products.reduce(

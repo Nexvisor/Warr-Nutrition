@@ -10,13 +10,14 @@ const razorpay = new Razorpay({
 });
 
 export const POST = async (req: NextRequest) => {
-  const session = await getServerSession(Next_Auth);
-  if (!session) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized. Please log in." },
-      { status: 401 }
-    );
-  }
+  // const session = await getServerSession(Next_Auth);
+  // console.log(session?.user?.id);
+  // if (session?.user?.id === null || session?.user?.id === undefined) {
+  //   return NextResponse.json(
+  //     { success: false, message: "Unauthorized. Please log in." },
+  //     { status: 401 }
+  //   );
+  // }
 
   try {
     const { totalPrice } = await req.json();

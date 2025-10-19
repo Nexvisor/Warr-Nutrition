@@ -57,7 +57,10 @@ export default function CartPage() {
             ...item,
             product: {
               ...item.product,
-              price: getDiscountPrice(item.product.discountPrice),
+              price: getDiscountPrice(
+                item.product.discountPrice,
+                item.product.id
+              ),
             },
           }))
         : [];
@@ -69,12 +72,16 @@ export default function CartPage() {
   const subtotal =
     cartProducts?.reduce(
       (total, item: CartItem) =>
-        total + getDiscountPrice(item.product.discountPrice) * item.quantity,
+        total +
+        getDiscountPrice(item.product.discountPrice, item.product.id) *
+          item.quantity,
       0
     ) || 0;
 
-  function getDiscountPrice(price: number) {
-    const actualPrice = Math.floor(price - (DiscountPercentage / 100) * price);
+  function getDiscountPrice(price: number, id: string) {
+    const actualPrice = Math.floor(
+      price - (DiscountPercentage(id) / 100) * price
+    );
     return actualPrice;
   }
 
@@ -416,7 +423,11 @@ export default function CartPage() {
                         <h3 className="text-sm font-medium">{product.title}</h3>
                         <div className="mt-2 flex items-center justify-between">
                           <span className="text-sm font-bold text-[#0047AB]">
-                            ₹{getDiscountPrice(product.discountPrice)}
+                            ₹
+                            {getDiscountPrice(
+                              product.discountPrice,
+                              product.id
+                            )}
                           </span>
                           <Button
                             size="sm"

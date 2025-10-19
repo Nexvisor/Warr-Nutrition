@@ -6,12 +6,17 @@ import { Product } from "@/utils/DataSlice";
 
 import { ProductCard } from "@/app/component/ProductCard";
 import { ChevronLeft } from "lucide-react";
+
+import { PRODUCT_IDS } from "@/constant/PRODUCT_IDs";
+
 import Link from "next/link";
 function CategoryPage() {
   const params = useParams();
   const { category } = params;
   const decodedCategory = decodeURIComponent(category as string);
-  const products = useSelector((state: any) => state.dataSlice.products);
+  const products = useSelector((state: any) => state.dataSlice.products).filter(
+    (product: Product) => !PRODUCT_IDS.includes(product.id)
+  );
 
   const filterProducts = products.filter(
     (product: Product) => product.category === decodedCategory

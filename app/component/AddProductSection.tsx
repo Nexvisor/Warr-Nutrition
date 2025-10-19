@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import ImageUpload from "./upload-image";
 import { toast } from "sonner";
 import {
@@ -124,7 +124,7 @@ function AddProductSection() {
   const abortController = new AbortController();
 
   const CATEGORIES = [
-    "Protine",
+    "Protein",
     "Ceratine",
     "Pre-Workout",
     "Multi-Vitamins",
@@ -448,7 +448,7 @@ function AddProductSection() {
                           render={({ field }) => (
                             <FormItem className="space-y-2">
                               <FormLabel className="text-sm font-medium text-gray-700">
-                                Discount Price ($)
+                                Discount Price (₹)
                               </FormLabel>
                               <Input
                                 placeholder="0.00"

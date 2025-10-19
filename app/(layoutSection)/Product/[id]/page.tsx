@@ -76,7 +76,7 @@ function ProductDetailPage() {
 
   const actualPrice = Math.floor(
     filterProduct.discountPrice -
-      (DiscountPercentage / 100) * filterProduct.discountPrice
+      (DiscountPercentage(filterProduct.id) / 100) * filterProduct.discountPrice
   );
   function addToCart(userId: string, productId: string, quantity: number) {
     if (!userId) {
@@ -262,7 +262,7 @@ function ProductDetailPage() {
               ₹{filterProduct.discountPrice}
             </span>
             <span className="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded">
-              {DiscountPercentage}% OFF
+              {DiscountPercentage(filterProduct.id)}% OFF
             </span>
           </div>
 

@@ -83,7 +83,7 @@ export default function ProductListPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   <div>
                     <p className="text-sm text-gray-500">Price</p>
-                    <p className="font-semibold">${product.discountPrice}</p>
+                    <p className="font-semibold">₹{product.discountPrice}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Category</p>

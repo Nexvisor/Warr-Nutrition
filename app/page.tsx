@@ -8,6 +8,7 @@ import { ProductSection } from "./component/ProductSection";
 import { WhyChooseUsSection } from "./component/why-choose-us-section";
 import { MobileSearch } from "./component/MobileSearch";
 import AboutSection from "./component/AboutSection";
+import NewProducts from "./component/NewProducts";
 
 export default function Home() {
   return (
@@ -21,6 +22,7 @@ export default function Home() {
         <HeroSection />
 
         <CategorySection />
+        <NewProducts />
         <ProductSection />
         <FeatureSection />
         <WhyChooseUsSection />
