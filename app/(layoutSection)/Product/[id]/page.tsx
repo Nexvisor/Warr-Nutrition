@@ -2,8 +2,6 @@
 import React, { useState, useTransition } from "react";
 import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-
-import Navbar from "@/app/component/Navbar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +15,7 @@ import {
 
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { PRODUCT_IDS } from "@/constant/PRODUCT_IDs";
 
 import Image from "next/image";
 
@@ -78,6 +77,7 @@ function ProductDetailPage() {
     filterProduct.discountPrice -
       (DiscountPercentage(filterProduct.id) / 100) * filterProduct.discountPrice
   );
+
   function addToCart(userId: string, productId: string, quantity: number) {
     if (!userId) {
       router.push("/Login");
@@ -131,7 +131,8 @@ function ProductDetailPage() {
 
   const isOutofStuck =
     filterProduct.category === "Fish Oil" ||
-    filterProduct.category === "Protein" ||
+    (filterProduct.category === "Protein" &&
+      !PRODUCT_IDS.includes(filterProduct.id)) ||
     filterProduct.category === "Whey Protein" ||
     filterProduct.category === "Multi Vitamin";
 

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useTransition } from "react";
+import React, { useEffect, useTransition, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ShoppingCart, User, Shield } from "lucide-react";
@@ -14,18 +14,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { Cart, setAddress, setCart, setOrders } from "@/utils/DataSlice";
 import Image from "next/image";
 import axios from "axios";
+import { setGroupedByCategory, setProducts } from "@/utils/DataSlice";
+import { Product } from "@/utils/DataSlice";
+import { RootState } from "@/utils/Store";
 
 function Navbar() {
   const session = useSession();
 
   const dispatch = useDispatch();
   const navigation = useRouter();
+
   const { status } = session;
   const { userInfo } = useUserData();
   const [isPending, startTransition] = useTransition();
+  const user = useSelector((state: RootState) => state.dataSlice.userInfo);
   const cart = useSelector((state: any) => state.dataSlice.cart) as Cart;
   const isFetch = useSelector((state: any) => state.dataSlice.isFetch);
   const pathname = usePathname();
+
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (userInfo?.id) {
@@ -34,7 +41,7 @@ function Navbar() {
         dispatch(setCart(cartProducts));
       });
     }
-  }, [userInfo, isFetch, dispatch]);
+  }, [userInfo, isFetch]);
 
   useEffect(() => {
     if (!userInfo?.id) return;
@@ -68,7 +75,39 @@ function Navbar() {
     return () => {
       controller.abort();
     };
-  }, [userInfo, isFetch, dispatch]);
+  }, [userInfo, isFetch]);
+
+  const loadAndSetProductData = async () => {
+    try {
+      const res = await axios.get("/api/getProduct");
+
+      let products = res.data.allProducts || [];
+
+      // Categorise the product based on their category
+      const groupedByCategory: Record<string, Product[]> = products.reduce(
+        (acc: Record<string, Product[]>, product: Product) => {
+          const category = product.category;
+
+          if (!acc[category]) {
+            acc[category] = [];
+          }
+
+          acc[category].push(product);
+          return acc;
+        },
+        {} as Record<string, Product[]>
+      );
+
+      dispatch(setGroupedByCategory(groupedByCategory));
+      dispatch(setProducts(products));
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    loadAndSetProductData();
+  }, []);
 
   return (
     <header className="border-b sticky top-0 z-50 bg-white">
@@ -102,7 +141,7 @@ function Navbar() {
                 <Shield className="flex md:hidden" />
                 <span className="hidden md:flex text-sm">Authenticity</span>
               </Link>
-              {status === "authenticated" && (
+              {(status === "authenticated" || user.id) && (
                 <>
                   <Link
                     href="/account"
@@ -128,7 +167,7 @@ function Navbar() {
                 </>
               )}
 
-              {status !== "authenticated" && (
+              {status !== "authenticated" && !user?.id && (
                 <Button
                   className="bg-gradient-to-br from-[#1e7ae4] to-[#052f5e] text-white px-6 py-2 rounded-md shadow-md hover:opacity-90 transition"
                   onClick={() => navigation.push("/Login")}

@@ -1,11 +1,8 @@
 "use client";
 import React from "react";
 import { CategoryCard } from "./CategoryCard";
-import { useState, useTransition, useEffect, useRef } from "react";
-import axios from "axios";
+import { useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setGroupedByCategory, setProducts } from "@/utils/DataSlice";
-
 import { Product } from "@/utils/DataSlice";
 
 export function CategorySection() {
@@ -14,42 +11,6 @@ export function CategorySection() {
   const groupedByCategory = useSelector(
     (state: any) => state.dataSlice.groupedByCategory
   );
-
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState(null);
-
-  const loadAndSetProductData = async () => {
-    try {
-      const res = await axios.get("/api/getProduct");
-      startTransition(() => {
-        let products = res.data.allProducts || [];
-
-        // Categorise the product based on their category
-        const groupedByCategory: Record<string, Product[]> = products.reduce(
-          (acc: Record<string, Product[]>, product: Product) => {
-            const category = product.category;
-
-            if (!acc[category]) {
-              acc[category] = [];
-            }
-
-            acc[category].push(product);
-            return acc;
-          },
-          {} as Record<string, Product[]>
-        );
-
-        dispatch(setGroupedByCategory(groupedByCategory));
-        dispatch(setProducts(products));
-      });
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
-
-  useEffect(() => {
-    loadAndSetProductData();
-  }, []);
 
   return (
     <section className="py-12 bg-gray-100">

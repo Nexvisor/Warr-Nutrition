@@ -122,6 +122,7 @@ const dataSlice = createSlice({
     setOrders: (state, action: PayloadAction<Order[]>) => {
       state.orders = action.payload;
     },
+    removeState: () => initialState,
   },
 });
 export const {
@@ -133,5 +134,6 @@ export const {
   setAddress,
   setSelectedAddressId,
   setOrders,
+  removeState,
 } = dataSlice.actions;
 export default dataSlice.reducer;
